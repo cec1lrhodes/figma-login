@@ -1,0 +1,165 @@
+@reference "./index.css";
+
+.page {
+  @apply min-h-screen bg-[#FFFFFF] p-0 text-[#111827] lg:p-8;
+}
+
+.shell {
+  @apply mx-auto flex min-h-screen w-full max-w-[1440px] overflow-hidden bg-[#FFFFFF] shadow-2xl shadow-slate-200/70 lg:min-h-[calc(100vh-4rem)] lg:rounded-[28px];
+}
+
+.imagePanel {
+  @apply relative hidden flex-1 overflow-hidden lg:block;
+}
+
+.heroImage {
+  @apply h-full w-full object-cover;
+}
+
+.imageOverlay {
+  @apply absolute inset-0 bg-linear-to-t from-black/35 via-transparent to-transparent;
+}
+
+.photoCredit {
+  @apply absolute bottom-12 left-12 font-['Roboto'] text-[12px] font-normal leading-[16px] tracking-[-0.4px] text-white/90;
+}
+
+.photoCreditName {
+  @apply border-b border-white;
+}
+
+.aside {
+  @apply flex min-h-screen w-full flex-col bg-white px-[30px] py-11 sm:px-14 lg:min-h-0 lg:w-[456px] lg:px-12 lg:py-10;
+}
+
+.desktopBrand {
+  @apply hidden items-center gap-2 lg:flex;
+}
+
+.avatar {
+  @apply h-12 w-12 rounded-full;
+}
+
+.brandText {
+  @apply w-[92px] font-bold text-[#1A1A1A];
+}
+
+.content {
+  @apply w-full lg:mt-12;
+}
+
+.title {
+  @apply w-full text-[20px] font-semibold tracking-[-0.01em] text-[#1A1A1A] lg:w-[360px];
+}
+
+.form {
+  @apply mt-6;
+}
+
+.field {
+  @apply block;
+}
+
+.fieldName {
+  @apply mb-2 hidden px-2 text-xs font-normal text-[#333333] text-[11px] leading-[12px] tracking-[0.3px] lg:block;
+}
+
+.textInput {
+  @apply h-12 w-full rounded-[6px] border border-[#E5E5E5] bg-[#f2f2f2] px-[16px] text-left text-[15px] leading-5 tracking-normal text-[#111827] outline-none transition placeholder:font-['Roboto'] placeholder:text-[#808080] focus:ring-2 focus:ring-[#0f84ff];
+}
+
+.passwordField {
+  @apply mt-3 block lg:mt-5;
+}
+
+.passwordInputWrap {
+  @apply relative;
+}
+
+.passwordInput {
+  @apply h-12 w-full rounded-[6px] border border-[#E5E5E5] bg-[#f2f2f2] px-[16px] pr-12 text-left text-[15px] leading-5 tracking-normal text-[#111827] outline-none transition placeholder:font-['Roboto'] placeholder:text-[#808080] focus:ring-2 focus:ring-[#0f84ff];
+}
+
+.iconButton {
+  @apply absolute right-4 top-1/2 -translate-y-1/2 text-[#5b5b5b];
+}
+
+.eyeIcon {
+  @apply text-[#4D4D4D];
+}
+
+.optionsRow {
+  @apply mt-5 flex items-center justify-between text-[12px] font-normal tracking-[0.3px];
+}
+
+.rememberLabel {
+  @apply flex items-center gap-2 text-[#1A1A1A];
+}
+
+.rememberInput {
+  @apply sr-only;
+}
+
+.rememberToggle {
+  @apply relative h-5 w-9 rounded-full bg-[#F2F2F2] transition after:absolute after:left-0.5 after:top-0.5 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-sm after:transition;
+}
+
+.rememberInput:checked + .rememberToggle {
+  @apply bg-[#0f84ff];
+}
+
+.rememberInput:checked + .rememberToggle::after {
+  @apply translate-x-4;
+}
+
+.forgotLink {
+  @apply text-[12px] font-normal tracking-[0.3px] text-[#007AFF];
+}
+
+.signInButton {
+  @apply mt-3 w-full rounded-[6px] bg-[#0f84ff] px-6 py-[10px] font-[`Roboto`] text-[15px] font-bold tracking-[0.3px] text-white shadow-lg shadow-blue-500/20 transition hover:bg-[#0577ee] lg:mt-8;
+}
+
+.divider {
+  @apply my-6 h-px w-full bg-[#eeeeee] lg:my-8;
+}
+
+.googleButton {
+  @apply flex w-full items-center justify-center gap-2 rounded-[6px] bg-[#333333] px-4 py-[10px] text-[12px] font-normal tracking-[0.3px] text-white transition hover:bg-[#262626];
+}
+
+.googleIcon {
+  @apply text-lg font-bold;
+}
+
+.googleIconLetter {
+  @apply text-[#4285f4];
+}
+
+.signupText {
+  @apply mt-6 flex justify-center gap-2 text-[12px] leading-5 tracking-[0.3px] text-[#1A1A1A];
+}
+
+.signupLink {
+  @apply font-medium text-[#0f84ff];
+}
+
+.mobileBrand {
+  @apply mt-[69px] flex items-center justify-center gap-2 lg:hidden;
+}
+
+.footer {
+  @apply mt-auto flex items-center justify-between pt-12 text-[#8a8a8a];
+}
+
+.socialLink {
+  @apply flex items-center gap-1 font-['Roboto'] text-[12px] tracking-[0.4px] text-[#0f84ff];
+}
+
+.figmaIcon {
+  @apply h-6 w-6;
+}
+
+.copyright {
+  @apply font-['Roboto'] text-[12px] leading-[16px] tracking-[-0.4px];
+}
