@@ -17,7 +17,7 @@ export const App = () => {
   const [googleToggle, setGoogleToggle] = useState(false);
 
   const [signInToggle, setSignInToggle] = useState(false);
-  const { error, isLoading, isLoggedIn, login, logout } = useAuth();
+  const { error, isLoading, isLoggedIn, login, register, logout } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -185,7 +185,14 @@ export const App = () => {
           </footer>
         </aside>
       </section>
-      {signInToggle ? <Register onClose={handleSignInToggle} /> : null}
+      {signInToggle ? (
+        <Register
+          error={error}
+          isLoading={isLoading}
+          onClose={handleSignInToggle}
+          onRegister={register}
+        />
+      ) : null}
     </main>
   );
 };

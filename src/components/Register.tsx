@@ -1,16 +1,39 @@
+import { type FormEvent, useState } from "react";
 import styles from "../login.module.css";
 
 type RegisterProps = {
+  error: string;
+  isLoading: boolean;
   onClose: () => void;
+  onRegister: (credentials: { email: string; password: string }) => Promise<void>;
 };
 
-export const Register = ({ onClose }: RegisterProps) => {
+export const Register = ({
+  error,
+  isLoading,
+  onClose,
+  onRegister,
+}: RegisterProps) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [validationError, setValidationError] = useState("");
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setValidationError("");
+
+    if (password !== confirmPassword) {
+      setValidationError("Passwords do not match");
+      return;
+    }
+
+    await onRegister({ email, password });
+  };
+
   return (
     <div className={styles.registerOverlay}>
-      <form
-        className={styles.registerCard}
-        onSubmit={(event) => event.preventDefault()}
-      >
+      <form className={styles.registerCard} onSubmit={handleSubmit}>
         <button
           type="button"
           className={styles.registerCloseButton}
@@ -31,6 +54,8 @@ export const Register = ({ onClose }: RegisterProps) => {
             type="text"
             placeholder="Email or phone number"
             className={styles.textInput}
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
           />
         </label>
 
@@ -40,6 +65,8 @@ export const Register = ({ onClose }: RegisterProps) => {
             type="password"
             placeholder="Create password"
             className={styles.passwordInput}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
           />
         </label>
 
@@ -49,11 +76,21 @@ export const Register = ({ onClose }: RegisterProps) => {
             type="password"
             placeholder="Confirm password"
             className={styles.passwordInput}
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
           />
         </label>
 
-        <button type="submit" className={styles.signInButton}>
-          Register
+        {validationError || error ? (
+          <p className={styles.errorMessage}>{validationError || error}</p>
+        ) : null}
+
+        <button
+          type="submit"
+          className={styles.signInButton}
+          disabled={isLoading}
+        >
+          {isLoading ? "Creating account..." : "Register"}
         </button>
       </form>
     </div>

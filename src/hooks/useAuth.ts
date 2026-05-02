@@ -7,6 +7,11 @@ type LoginCredentials = {
   password: string;
 };
 
+type RegisterCredentials = {
+  email: string;
+  password: string;
+};
+
 export const useAuth = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -77,6 +82,44 @@ export const useAuth = () => {
     }
   };
 
+  const register = async ({ email, password }: RegisterCredentials) => {
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
+
+      localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
+      setIsLoggedIn(true);
+    } catch (registerError) {
+      const message =
+        registerError instanceof Error
+          ? registerError.message
+          : "Registration failed";
+
+      setError(message);
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     setIsLoggedIn(false);
@@ -92,6 +135,7 @@ export const useAuth = () => {
     isLoading,
     isLoggedIn,
     login,
+    register,
     logout,
   };
 };
