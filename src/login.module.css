@@ -120,6 +120,22 @@
   @apply mt-3 w-full rounded-[6px] bg-[#0f84ff] px-6 py-[10px] font-[`Roboto`] text-[15px] font-bold tracking-[0.3px] text-white shadow-lg shadow-blue-500/20 transition hover:bg-[#0577ee] lg:mt-8;
 }
 
+.signInButton:disabled {
+  @apply cursor-not-allowed opacity-70;
+}
+
+.errorMessage {
+  @apply mt-4 rounded-[6px] bg-red-50 px-3 py-2 text-[12px] leading-5 text-red-600;
+}
+
+.loggedInCard {
+  @apply m-auto flex w-[min(420px,calc(100%-32px))] flex-col items-center rounded-[24px] bg-white p-10 text-center shadow-2xl shadow-slate-200/70;
+}
+
+.successText {
+  @apply mt-4 text-[14px] leading-6 text-[#5b5b5b];
+}
+
 .divider {
   @apply my-6 h-px w-full bg-[#eeeeee] lg:my-8;
 }

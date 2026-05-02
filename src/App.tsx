@@ -2,8 +2,115 @@ import boatImage from "./screenshots/boat.png";
 import figmaIcon from "./screenshots/figma.png";
 import avatarImage from "./screenshots/avatar.png";
 import styles from "./login.module.css";
+import { useEffect, useState } from "react";
+
+const ACCESS_TOKEN_KEY = "accessToken";
 
 export const App = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(() =>
+    Boolean(localStorage.getItem(ACCESS_TOKEN_KEY)),
+  );
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      return;
+    }
+
+    const restoreSession = async () => {
+      try {
+        const response = await fetch("/api/auth/refresh", {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+        localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
+        setIsLoggedIn(true);
+      } catch {
+        localStorage.removeItem(ACCESS_TOKEN_KEY);
+      }
+    };
+
+    void restoreSession();
+  }, [isLoggedIn]);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
+      setIsLoggedIn(true);
+    } catch (loginError) {
+      const message =
+        loginError instanceof Error ? loginError.message : "Login failed";
+
+      setError(message);
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    setIsLoggedIn(false);
+
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+  };
+
+  if (isLoggedIn) {
+    return (
+      <main className={styles.page}>
+        <section className={styles.loggedInCard}>
+          <h1 className={styles.title}>You are loggined</h1>
+          <p className={styles.successText}>
+            Access token saved in localStorage, refresh token saved in cookie.
+          </p>
+          <button
+            type="button"
+            className={styles.signInButton}
+            onClick={handleLogout}
+          >
+            Log out
+          </button>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className={styles.page}>
       <section className={styles.shell}>
@@ -15,8 +122,8 @@ export const App = () => {
           />
           <div className={styles.imageOverlay} />
           <p className={styles.photoCredit}>
-            Photo by{" "}
-            <span className={styles.photoCreditName}>Alexandr Popadin</span>
+            Photo by
+            <span className={styles.photoCreditName}> Alexandr Popadin</span>
           </p>
         </div>
 
@@ -28,37 +135,37 @@ export const App = () => {
           </div>
 
           <div className={styles.content}>
-            <h1 className={styles.title}>
-              Nice to see you again
-            </h1>
+            <h1 className={styles.title}>Nice to see you again</h1>
 
-            <form className={styles.form}>
+            <form className={styles.form} onSubmit={handleSubmit}>
               <label className={styles.field}>
-                <span className={styles.fieldName}>
-                  Login
-                </span>
+                <span className={styles.fieldName}>Login</span>
                 <input
                   type="text"
                   placeholder="Email or phone number"
                   className={styles.textInput}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </label>
 
               <label className={styles.passwordField}>
-                <span className={styles.fieldName}>
-                  Password
-                </span>
+                <span className={styles.fieldName}>Password</span>
                 <div className={styles.passwordInputWrap}>
-                  {/* stop here */}
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Enter password"
                     className={styles.passwordInput}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
                     type="button"
-                    aria-label="Show password"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     className={styles.iconButton}
+                    onClick={() => setShowPassword((value) => !value)}
                   >
                     <svg
                       width="16"
@@ -81,24 +188,29 @@ export const App = () => {
 
               <div className={styles.optionsRow}>
                 <label className={styles.rememberLabel}>
-                  <input type="checkbox" className={styles.rememberInput} />
+                  <input
+                    type="checkbox"
+                    className={styles.rememberInput}
+                    checked={rememberMe}
+                    onChange={(event) => setRememberMe(event.target.checked)}
+                  />
                   <span className={styles.rememberToggle} />
                   Remember me
                 </label>
 
-                <a
-                  href="#"
-                  className={styles.forgotLink}
-                >
+                <a href="#" className={styles.forgotLink}>
                   Forgot password?
                 </a>
               </div>
 
+              {error ? <p className={styles.errorMessage}>{error}</p> : null}
+
               <button
                 type="submit"
                 className={styles.signInButton}
+                disabled={isLoading}
               >
-                Sign in
+                {isLoading ? "Signing in..." : "Sign in"}
               </button>
             </form>
 
@@ -126,16 +238,15 @@ export const App = () => {
           </div>
 
           <footer className={styles.footer}>
-            <a
-              href="#"
-              className={styles.socialLink}
-            >
-              <img src={figmaIcon} alt="Figma icon" className={styles.figmaIcon} />
+            <a href="#" className={styles.socialLink}>
+              <img
+                src={figmaIcon}
+                alt="Figma icon"
+                className={styles.figmaIcon}
+              />
               @uiunicorn
             </a>
-            <span className={styles.copyright}>
-              © Perfect Login 2021
-            </span>
+            <span className={styles.copyright}>© Perfect Login 2021</span>
           </footer>
         </aside>
       </section>
