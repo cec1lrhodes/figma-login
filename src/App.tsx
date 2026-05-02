@@ -2,114 +2,39 @@ import boatImage from "./screenshots/boat.png";
 import figmaIcon from "./screenshots/figma.png";
 import avatarImage from "./screenshots/avatar.png";
 import styles from "./login.module.css";
-import { useEffect, useState } from "react";
-
-const ACCESS_TOKEN_KEY = "accessToken";
+import { useState } from "react";
+import { Logged } from "./components/Logged";
+import { useAuth } from "./hooks/useAuth";
+import { Register } from "./components/Register";
+import { Google } from "./components/Google";
 
 export const App = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(() =>
-    Boolean(localStorage.getItem(ACCESS_TOKEN_KEY)),
-  );
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      return;
-    }
+  const [googleToggle, setGoogleToggle] = useState(false);
 
-    const restoreSession = async () => {
-      try {
-        const response = await fetch("/api/auth/refresh", {
-          method: "POST",
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          return;
-        }
-
-        const data = await response.json();
-        localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
-        setIsLoggedIn(true);
-      } catch {
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
-      }
-    };
-
-    void restoreSession();
-  }, [isLoggedIn]);
+  const [signInToggle, setSignInToggle] = useState(false);
+  const { error, isLoading, isLoggedIn, login, logout } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
-      setIsLoggedIn(true);
-    } catch (loginError) {
-      const message =
-        loginError instanceof Error ? loginError.message : "Login failed";
-
-      setError(message);
-      localStorage.removeItem(ACCESS_TOKEN_KEY);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    setIsLoggedIn(false);
-
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
+    await login({ email, password });
   };
 
   if (isLoggedIn) {
-    return (
-      <main className={styles.page}>
-        <section className={styles.loggedInCard}>
-          <h1 className={styles.title}>You are loggined</h1>
-          <p className={styles.successText}>
-            Access token saved in localStorage, refresh token saved in cookie.
-          </p>
-          <button
-            type="button"
-            className={styles.signInButton}
-            onClick={handleLogout}
-          >
-            Log out
-          </button>
-        </section>
-      </main>
-    );
+    return <Logged handleLogout={logout} />;
   }
+
+  const handleSignInToggle = () => {
+    setSignInToggle((value) => !value);
+  };
+
+  const handleGoogleToggle = () => {
+    setGoogleToggle((value) => !value);
+  };
 
   return (
     <main className={styles.page}>
@@ -216,16 +141,26 @@ export const App = () => {
 
             <div className={styles.divider} />
 
-            <button className={styles.googleButton}>
+            <button
+              className={styles.googleButton}
+              onClick={handleGoogleToggle}
+            >
               <span className={styles.googleIcon}>
                 <span className={styles.googleIconLetter}>G</span>
               </span>
               Or sign in with Google
             </button>
-
+            {googleToggle ? <Google onClose={handleGoogleToggle} /> : null}
             <p className={styles.signupText}>
               Dont have an account?
-              <a href="#" className={styles.signupLink}>
+              <a
+                href="#"
+                className={styles.signupLink}
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleSignInToggle();
+                }}
+              >
                 Sign up now
               </a>
             </p>
@@ -250,6 +185,7 @@ export const App = () => {
           </footer>
         </aside>
       </section>
+      {signInToggle ? <Register onClose={handleSignInToggle} /> : null}
     </main>
   );
 };

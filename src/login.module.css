@@ -160,6 +160,26 @@
   @apply font-medium text-[#0f84ff];
 }
 
+.registerOverlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-white/35 px-5 backdrop-blur-md;
+}
+
+.registerCard {
+  @apply relative w-full max-w-[420px] rounded-[24px] bg-white px-8 py-10 shadow-2xl shadow-slate-900/20;
+}
+
+.registerCloseButton {
+  @apply absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-[#f2f2f2] text-[22px] leading-none text-[#4D4D4D] transition hover:bg-[#e5e5e5] hover:text-[#1A1A1A];
+}
+
+.registerTitle {
+  @apply text-[20px] font-semibold tracking-[-0.01em] text-[#1A1A1A];
+}
+
+.registerSubtitle {
+  @apply mb-6 mt-2 text-[13px] leading-5 tracking-[0.3px] text-[#5b5b5b];
+}
+
 .mobileBrand {
   @apply mt-[69px] flex items-center justify-center gap-2 lg:hidden;
 }
