@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from "../login.module.css";
+import { validateLoginCredentials } from "../utils/authValidation";
 
 export type LoginCredentials = {
   email: string;
@@ -37,11 +38,21 @@ export const LoginForm = ({ error, isLoading, onLogin }: LoginFormProps) => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
   const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = async (
     event,
   ) => {
     event.preventDefault();
+
+    const errorMessage = validateLoginCredentials({ email, password });
+
+    if (errorMessage) {
+      setValidationError(errorMessage);
+      return;
+    }
+
+    setValidationError("");
     await onLogin({ email, password });
   };
 
@@ -96,7 +107,9 @@ export const LoginForm = ({ error, isLoading, onLogin }: LoginFormProps) => {
         </a>
       </div>
 
-      {error ? <p className={styles.errorMessage}>{error}</p> : null}
+      {validationError || error ? (
+        <p className={styles.errorMessage}>{validationError || error}</p>
+      ) : null}
 
       <button
         type="submit"

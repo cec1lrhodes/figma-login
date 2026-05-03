@@ -1,5 +1,6 @@
 import { useState } from "react";
 import styles from "../login.module.css";
+import { validateRegisterCredentials } from "../utils/authValidation";
 
 type RegisterProps = {
   error: string;
@@ -26,13 +27,19 @@ export const Register = ({
     event,
   ) => {
     event.preventDefault();
-    setValidationError("");
 
-    if (password !== confirmPassword) {
-      setValidationError("Passwords do not match");
+    const errorMessage = validateRegisterCredentials({
+      email,
+      password,
+      confirmPassword,
+    });
+
+    if (errorMessage) {
+      setValidationError(errorMessage);
       return;
     }
 
+    setValidationError("");
     await onRegister({ email, password });
   };
 
