@@ -1,11 +1,14 @@
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import styles from "../login.module.css";
 
 type RegisterProps = {
   error: string;
   isLoading: boolean;
   onClose: () => void;
-  onRegister: (credentials: { email: string; password: string }) => Promise<void>;
+  onRegister: (credentials: {
+    email: string;
+    password: string;
+  }) => Promise<void>;
 };
 
 export const Register = ({
@@ -19,7 +22,9 @@ export const Register = ({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [validationError, setValidationError] = useState("");
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = async (
+    event,
+  ) => {
     event.preventDefault();
     setValidationError("");
 
