@@ -1,23 +1,21 @@
 import { useEffect, useState } from "react";
-
-const ACCESS_TOKEN_KEY = "accessToken";
-
-type LoginCredentials = {
-  email: string;
-  password: string;
-};
-
-type RegisterCredentials = {
-  email: string;
-  password: string;
-};
+import {
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  registerUser,
+  type AuthCredentials,
+} from "../services/authApi";
+import {
+  clearAccessToken,
+  hasAccessToken,
+  saveAccessToken,
+} from "../utils/authToken";
 
 export const useAuth = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(() =>
-    Boolean(localStorage.getItem(ACCESS_TOKEN_KEY)),
-  );
+  const [isLoggedIn, setIsLoggedIn] = useState(hasAccessToken);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -26,108 +24,56 @@ export const useAuth = () => {
 
     const restoreSession = async () => {
       try {
-        const response = await fetch("/api/auth/refresh", {
-          method: "POST",
-          credentials: "include",
-        });
+        const accessToken = await refreshAccessToken();
 
-        if (!response.ok) {
+        if (!accessToken) {
           return;
         }
 
-        const data = await response.json();
-        localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
+        saveAccessToken(accessToken);
         setIsLoggedIn(true);
       } catch {
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
+        clearAccessToken();
       }
     };
 
     void restoreSession();
   }, [isLoggedIn]);
 
-  const login = async ({ email, password }: LoginCredentials) => {
+  const authenticate = async (
+    credentials: AuthCredentials,
+    requestAccessToken: (credentials: AuthCredentials) => Promise<string>,
+    fallbackError: string,
+  ) => {
     setError("");
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
+      const accessToken = await requestAccessToken(credentials);
+      saveAccessToken(accessToken);
       setIsLoggedIn(true);
-    } catch (loginError) {
+    } catch (authError) {
       const message =
-        loginError instanceof Error ? loginError.message : "Login failed";
+        authError instanceof Error ? authError.message : fallbackError;
 
       setError(message);
-      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      clearAccessToken();
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async ({ email, password }: RegisterCredentials) => {
-    setError("");
-    setIsLoading(true);
+  const login = (credentials: AuthCredentials) =>
+    authenticate(credentials, loginUser, "Login failed");
 
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
-
-      localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
-      setIsLoggedIn(true);
-    } catch (registerError) {
-      const message =
-        registerError instanceof Error
-          ? registerError.message
-          : "Registration failed";
-
-      setError(message);
-      localStorage.removeItem(ACCESS_TOKEN_KEY);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const register = (credentials: AuthCredentials) =>
+    authenticate(credentials, registerUser, "Registration failed");
 
   const logout = async () => {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    clearAccessToken();
     setIsLoggedIn(false);
 
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
+    await logoutUser();
   };
 
   return {
